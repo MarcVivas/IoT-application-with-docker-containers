@@ -1,0 +1,39 @@
+version: "3.9"
+services:
+  mosquitto:
+    image: eclipse-mosquitto:1.6.15
+    container_name: mosquitto
+    volumes:
+      - ./MQTT_broker_mosquitto:/mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+
+
+  server:
+    build:
+      context: ./Cloud_service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    links:
+      - mosquitto
+    depends_on:
+      - mosquitto
+    volumes:
+      - ./Cloud_service:/home/app
+
+  sensor_1:
+    build:
+      context: ./IoT_devices
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3001:3000"
+    environment:
+      - ID=1
+    links:
+      - mosquitto
+    depends_on:
+      - mosquitto
+    volumes:
+      - ./IoT_devices:/home/app

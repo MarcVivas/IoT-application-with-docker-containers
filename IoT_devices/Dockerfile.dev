@@ -1,0 +1,12 @@
+FROM node:19
+
+RUN mkdir -p /home/app
+
+WORKDIR /home/app
+
+EXPOSE 3000
+
+RUN npm i -g nodemon    #Only while developing
+RUN npm install mqtt --save
+
+CMD ["nodemon", "sensor.js"]
