@@ -38,10 +38,14 @@ function main() {
         let i = 0; // Counter to iterate the collected data
 
         setInterval(() => {
-			
+
+            let temperatureId = i++ % collected_data.length;
+
             const message = JSON.stringify({
                 "sensorId": process.env.HOSTNAME,
-                "temperature": collected_data[i++]
+                "temperature": collected_data[temperatureId],
+                'temperatureId': temperatureId,
+                'collectedAt': new Date()
             });
 
             client.publish(topic, message, { qos: 0 }, (error) => {
@@ -49,8 +53,6 @@ function main() {
                     console.error(error);
                 }
             });
-
-            i === collected_data.length ? i=0: () => {/*pass*/};
 
         }, 10 * 1000);
         // -----------------------------------------------------------

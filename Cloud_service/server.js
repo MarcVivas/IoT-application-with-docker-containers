@@ -4,12 +4,12 @@ const mongoose = require('mongoose');
 
 const Sensor = mongoose.model('Sensor', new mongoose.Schema(
         {
-            _id: Number,
+            _id: String,
             temperatures: [
                 {
                     _id: Number,
                     temperature: Number,
-                    predictedValue: Number
+                    collected_at: Date
                 }
             ],
         }
@@ -47,7 +47,7 @@ function main(){
         });
 
         // Listen to the broker
-        mqtt_client.on('message', async function (topic, message) {
+        mqtt_client.on('message', function (topic, message) {
             // Message received
 
             // Get json
@@ -55,13 +55,14 @@ function main(){
 
             console.log("Server: Message received from sensor " + data.sensorId);
 
-            await Sensor.findOneAndUpdate(
+            Sensor.findOneAndUpdate(
                 {_id: data.sensorId},
                 {
                     $push: {
                         temperatures: {
+                            _id: data.temperatureId,
                             temperature: data.temperature,
-                            predictedValue: 3
+                            collected_at: data.collectedAt
                         }
                     }
                 },
