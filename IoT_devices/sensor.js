@@ -1,35 +1,60 @@
-//console.log(process.env.ID);
-
 main();
 
 
 function main() {
-  const mqtt = require('mqtt');
+    const mqtt = require('mqtt');
 
-  const client = mqtt.connect(
-    {
-      host: 'mosquitto',
-      port: 1883
-    }
-  );
-
-  let topic = 'temperature';
-
-  // Once connected ...
-  client.on('connect', () => {
-
-    console.log('Sensor '+ process.env.ID + ' is now connected to the MQTT broker');
-
-    // Every 10 seconds publish a message to the temperature topic!
-    setInterval(() => {
-      client.publish(topic, `Hey I am sensor ${process.env.ID}!`, { qos: 0, retain: false }, (error) => {
-        if (error) {
-          console.error(error);
+    // -----------------------------------------------------------
+    // Connect to the message broker
+    const client = mqtt.connect(
+        {
+            host: 'mosquitto',
+            port: 1883
         }
-      });
-    }, 10*1000);
+    );
+    // -----------------------------------------------------------
 
 
-  });
+    // -----------------------------------------------------------
+    // Read csv
+    let collected_data = (require("fs").readFileSync("./data2.csv", "utf8")).split("\r");
+    // Remove the column name (Temperature) from the array
+    collected_data.shift();
+    // -----------------------------------------------------------
+
+
+
+    let topic = 'temperature';
+
+    // Once connected ...
+    client.on('connect', () => {
+
+        // Sensor connected
+        console.log('Sensor '+ process.env.HOSTNAME + ' is now connected to the MQTT broker');
+
+        // -----------------------------------------------------------
+        // Every 10 seconds publish a message to the temperature topic!
+
+        let i = 0; // Counter to iterate the collected data
+
+        setInterval(() => {
+			
+            const message = JSON.stringify({
+                "sensorId": process.env.HOSTNAME,
+                "temperature": collected_data[i++]
+            });
+
+            client.publish(topic, message, { qos: 0 }, (error) => {
+                if (error) {
+                    console.error(error);
+                }
+            });
+
+            i === collected_data.length ? i=0: () => {/*pass*/};
+
+        }, 10 * 1000);
+        // -----------------------------------------------------------
+
+    });
 
 }

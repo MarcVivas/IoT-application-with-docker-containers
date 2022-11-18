@@ -6,7 +6,9 @@ WORKDIR /home/app
 
 EXPOSE 3000
 
-RUN npm i -g nodemon    #Only while developing
-RUN npm install mqtt --save
+RUN npm i -g nodemon@2.0.20    #Only while developing
+RUN npm i mqtt@4.3.7
+RUN npm i mongoose@6.7.2
+
 
 CMD ["nodemon", "server.js"]

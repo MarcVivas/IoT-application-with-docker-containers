@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "mongoose": "^6.7.2",
     "mqtt": "^4.3.7"
   }
 }

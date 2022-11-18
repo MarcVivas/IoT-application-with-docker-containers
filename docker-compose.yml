@@ -1,5 +1,11 @@
 version: "3.9"
 services:
+  mongo:
+    image: mongo:4.2.23
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: 1234
+
   mosquitto:
     image: eclipse-mosquitto:1.6.15
     container_name: mosquitto
@@ -9,6 +15,18 @@ services:
       - "1883:1883"
       - "9001:9001"
 
+  sensor:
+    build:
+      context: ./IoT_devices
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3001-3501:3000"
+    links:
+      - server
+    depends_on:
+      - mosquitto
+    volumes:
+      - ./IoT_devices:/home/app
 
   server:
     build:
@@ -18,22 +36,22 @@ services:
       - "3000:3000"
     links:
       - mosquitto
+      - mongo
     depends_on:
       - mosquitto
+      - mongo
     volumes:
       - ./Cloud_service:/home/app
 
-  sensor_1:
-    build:
-      context: ./IoT_devices
-      dockerfile: Dockerfile.dev
+  mongo_express:
+    image: mongo-express:0.54.0
     ports:
-      - "3001:3000"
+      - "8081:8081"
     environment:
-      - ID=1
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: 1234
     links:
-      - mosquitto
+      - mongo
     depends_on:
-      - mosquitto
-    volumes:
-      - ./IoT_devices:/home/app
+      - mongo
