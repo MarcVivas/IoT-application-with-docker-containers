@@ -54,7 +54,7 @@ function publishCollectedData(collectedData, topic, client){
             "sensorId": process.env.HOSTNAME,
             "temperature": collectedData[temperatureId],
             'temperatureId': temperatureId,
-            'collectedAt': new Date()
+            'collectedAt': new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
         });
 
         client.publish(topic, message, { qos: 0 }, (error) => {

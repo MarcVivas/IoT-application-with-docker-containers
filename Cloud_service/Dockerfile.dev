@@ -9,6 +9,8 @@ EXPOSE 3000
 RUN npm i -g nodemon@2.0.20    #Only while developing
 RUN npm i mqtt@4.3.7
 RUN npm i mongoose@6.7.2
+RUN npm i kafka-node@5.0.0
+
 
 
 CMD ["nodemon", "server.js"]
