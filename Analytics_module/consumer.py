@@ -5,6 +5,23 @@ from prophet import Prophet
 from datetime import datetime
 from json import loads, dumps
 
+
+from kafka.admin import KafkaAdminClient, NewTopic
+
+
+try:
+    admin_client = KafkaAdminClient(
+        bootstrap_servers="kafka:9092",
+        client_id='test'
+    )
+
+    topic_list = []
+    topic_list.append(NewTopic(name="analytics_results", num_partitions=1, replication_factor=1))
+    admin_client.create_topics(new_topics=topic_list, validate_only=False)
+except:
+    pass
+
+
 my_consumer = KafkaConsumer(
     'analytics',
     bootstrap_servers=['kafka:9092'],
@@ -22,6 +39,8 @@ m = load(open("model_trained.pkl", "rb"))
 print("starting")
 
 for message in my_consumer:
+    print("------------- Analytics module -------------")
+    print("Message received!")
     print(f"{message} is being processed")
     message = message.value
     df_pred = pd.DataFrame.from_records([{"ds": message['ts']}])
@@ -31,4 +50,5 @@ for message in my_consumer:
     forecast['id'] = message['id']
     my_producer.send('analytics_results',
                      value= forecast[['id', 'ds', 'yhat', 'yhat_lower', 'yhat_upper', 'sensor']].to_json(orient="index", date_format='iso'))
+    print("------------- Analytics results -------------")
     print(forecast[['id', 'ds', 'yhat', 'yhat_lower', 'yhat_upper', 'sensor']].to_json(orient="index", date_format='iso'))

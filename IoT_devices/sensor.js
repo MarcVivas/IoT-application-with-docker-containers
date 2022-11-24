@@ -61,6 +61,9 @@ function publishCollectedData(collectedData, topic, client){
             if (error) {
                 console.error(error);
             }
+            else{
+                console.log("Sensor " + process.env.HOSTNAME + " has now sent a message to the server!");
+            }
         });
 
     }, 10 * 1000);

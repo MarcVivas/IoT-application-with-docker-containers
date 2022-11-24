@@ -1,4 +1,4 @@
-FROM node:19
+FROM node:19-alpine
 
 RUN mkdir -p /home/app
 
@@ -10,13 +10,13 @@ RUN npm i -g nodemon@2.0.20
 RUN npm i mqtt@4.3.7
 
 
-
+RUN apk update
 # Installing dockerize which can test and wait on the availability of a TCP host and port.
 ENV DOCKERIZE_VERSION v0.6.1
-RUN apk add --no-cache openssl \
-    && wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+RUN apk add --no-cache openssl
+RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+RUN tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+RUN rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
 # Installing bash.
 RUN apk add --no-cache bash bash-doc bash-completion

@@ -85,7 +85,8 @@ function main(){
 
 /**
  * The returned function is executed when the server receives a new message from the MQTT broker.
- * Saves the data received in the database.
+ * Saves the received data in the database.
+ * Sends the received data to the analytics module.
  * @param kafkaProducer
  * @return function
  */
@@ -115,7 +116,7 @@ function processMQTTMessage(kafkaProducer){
         );
 
 
-
+        // Send the received data to the analytics module
         kafkaProducer.send([{
             topic: 'analytics',
             messages: JSON.stringify({
@@ -124,19 +125,7 @@ function processMQTTMessage(kafkaProducer){
                 sensor: data.sensorId,
                 id: data.temperatureId
             })
-        }], (err, result)=>{
-            if(err){
-                console.log(err);
-            }
-            else{
-                console.log("Sending " + JSON.stringify({
-                    v: data.temperature,
-                    ts: data.collectedAt,
-                    sensor: data.sensorId,
-                    id: data.temperatureId
-                }));
-            }
-        });
+        }], sendCallback(data.sensorId));
 
 
     };
@@ -150,6 +139,7 @@ function processMQTTMessage(kafkaProducer){
  */
 function processKafkaMessage(message){
     message = JSON.parse(JSON.parse(message.value))['0'];
+    console.log("Server: Message received from the analytics module!");
 
     ModelPrediction.findOneAndUpdate(
         {_id: message.sensor},
@@ -166,7 +156,6 @@ function processKafkaMessage(message){
         },
         {upsert: true, new: true, runValidators: true}, // options
         findOneAndUpdateCallback)
-    console.log(message);
 
 }
 
@@ -195,6 +184,23 @@ function findOneAndUpdateCallback(err, doc){
         console.error("Couldn't update or create the sensor :/");
         console.error(err);
     }
+}
+
+
+/**
+ * Kafka send callback function
+ * @param sensorId
+ * @return {(function(*, *): void)|*}
+ */
+function sendCallback(sensorId){
+    return (error, result) => {
+        if(error){
+            console.error(error);
+        }
+        else{
+            console.log('The server has now sent data from the sensor ' + sensorId + ' to the analytics module!' )
+        }
+    };
 }
 
 

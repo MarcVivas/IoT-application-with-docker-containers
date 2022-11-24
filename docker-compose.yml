@@ -18,7 +18,7 @@ services:
   sensor:
     build:
       context: ./IoT_devices
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     restart: on-failure
     ports:
       - "3001-3501:3000"
@@ -32,7 +32,7 @@ services:
   server:
     build:
       context: ./Cloud_service
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     restart: on-failure
     ports:
       - "3000:3000"
@@ -67,6 +67,8 @@ services:
       context: ./Analytics_module
       dockerfile: Dockerfile
     restart: on-failure
+    ports:
+      - "8010:8010"
     depends_on:
       - kafka
     links:
