@@ -1,34 +1,42 @@
 const mqtt = require('mqtt')
 const mongoose = require('mongoose');
 const kafka = require("kafka-node");
-const nodePickle = require('node-pickle');
 
 const Sensor = mongoose.model('Sensor', new mongoose.Schema(
-        {
-            _id: String,        // ID of the sensor
-            temperatures: [
-                {
-                    _id: Number,
-                    temperature: Number,
-                    collected_at: Date
-                }
-            ],
+    {
+        temperature: Number,
+        collected_at: Date,
+        metadata: {
+            sensor_id: String
         }
+    },
+    {               // Collection options
+        timeseries: {
+            timeField: 'collected_at',
+            metaField: 'metadata',
+            granularity: 'seconds',
+        },
+    }
 ));
 
 
 const ModelPrediction = mongoose.model('Model_predictions', new mongoose.Schema(
     {
-        _id: String,            // ID of the sensor
-        predictions: [
-            {
-                _id: Number,
-                date: Date,
-                y_hat: Number,
-                y_hat_lower: Number,
-                y_hat_upper: Number
-            }
-        ],
+        date: Date,
+        y_hat: Number,
+        y_hat_lower: Number,
+        y_hat_upper: Number,
+        metadata: {
+            sensor_id: String,
+        }
+    },
+    {       // Collection options
+        timestamps: true,
+        timeseries: {
+            timeField: 'created_at',
+            metaField: 'metadata',
+            granularity: 'seconds',
+        },
     }
 ));
 
@@ -36,6 +44,10 @@ const ModelPrediction = mongoose.model('Model_predictions', new mongoose.Schema(
 
 main();
 
+/**
+ * Main function
+ * @return void
+ */
 function main(){
 
     //================================================================
@@ -99,22 +111,17 @@ function processMQTTMessage(kafkaProducer){
 
         console.log("Server: Message received from sensor " + data.sensorId);
 
-        // Create if it doesn't exist or update if it exists
-        Sensor.findOneAndUpdate(
-            {_id: data.sensorId},
+        // Store sensor's collected data
+        Sensor.create(
             {
-                $push: {
-                    temperatures: {
-                        _id: data.temperatureId,
-                        temperature: data.temperature,
-                        collected_at: data.collectedAt
-                    }
+                collected_at: data.collectedAt,
+                temperature: data.temperature,
+                metadata: {
+                    sensor_id: data.sensorId
                 }
             },
-            {upsert: true, new: true, runValidators: true}, // options
-            findOneAndUpdateCallback
+            createCallback
         );
-
 
         // Send the received data to the analytics module
         kafkaProducer.send([{
@@ -141,21 +148,19 @@ function processKafkaMessage(message){
     message = JSON.parse(JSON.parse(message.value))['0'];
     console.log("Server: Message received from the analytics module!");
 
-    ModelPrediction.findOneAndUpdate(
-        {_id: message.sensor},
+    // Store predictions!
+    ModelPrediction.create(
         {
-            $push: {
-                predictions: {
-                    _id: message.id,
-                    date: message.ds,
-                    y_hat: message.yhat,
-                    y_hat_lower: message.yhat_lower,
-                    y_hat_upper: message.yhat_upper
-                }
+            date: message.ds,
+            y_hat: message.yhat,
+            y_hat_lower: message.yhat_lower,
+            y_hat_upper: message.yhat_upper,
+            metadata: {
+                sensor_id: message.sensor,
             }
         },
-        {upsert: true, new: true, runValidators: true}, // options
-        findOneAndUpdateCallback)
+        createCallback
+    )
 
 }
 
@@ -175,13 +180,13 @@ function subscribeCallback(error, content){
 }
 
 /**
- * Mongoose findOneAndUpdate callback function.
+ * Mongoose create callback function.
  * @param err
  * @param doc
  */
-function findOneAndUpdateCallback(err, doc){
+function createCallback(err, doc){
     if (err) {
-        console.error("Couldn't update or create the sensor :/");
+        console.error("Couldn't store the sensor data");
         console.error(err);
     }
 }
