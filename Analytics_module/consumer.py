@@ -8,7 +8,7 @@ from json import loads, dumps
 
 from kafka.admin import KafkaAdminClient, NewTopic
 
-
+# Create the analytics_results topic if it does not exist
 try:
     admin_client = KafkaAdminClient(
         bootstrap_servers="kafka:9092",
