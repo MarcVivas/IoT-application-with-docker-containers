@@ -4,9 +4,11 @@ RUN mkdir -p /home/app
 
 WORKDIR /home/app
 
+ADD sensor.js sensor.js
+ADD data2.csv data2.csv
+
 EXPOSE 3000
 
-RUN npm i -g nodemon@2.0.20
 RUN npm i mqtt@4.3.7
 
 
@@ -22,4 +24,4 @@ RUN rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 RUN apk add --no-cache bash bash-doc bash-completion
 
 
-CMD sh -c "dockerize -wait tcp://mosquitto:1883 -wait tcp://zookeeper:2181 -wait tcp://kafka:9092 -wait tcp://mongo:27017 nodemon sensor.js"
+CMD sh -c "dockerize -wait tcp://mosquitto:1883 -wait-retry-interval 3s node sensor.js"

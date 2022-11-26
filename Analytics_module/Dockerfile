@@ -20,4 +20,4 @@ RUN apt-get install -y openssl \
 RUN apt-get install -y bash bash-doc bash-completion
 
 
-CMD sh -c "dockerize -wait tcp://mosquitto:1883 -wait tcp://zookeeper:2181 -wait tcp://kafka:9092 python3 -u consumer.py"
+CMD sh -c "dockerize -wait tcp://zookeeper:2181 -wait tcp://kafka:9092 -wait-retry-interval 3s python3 -u consumer.py"

@@ -5,12 +5,10 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: 1234
-    restart: on-failure
 
   mosquitto:
     image: eclipse-mosquitto:1.6.15
     container_name: mosquitto
-    restart: on-failure
     volumes:
       - ./MQTT_broker_mosquitto:/mosquitto
     ports:
@@ -20,19 +18,21 @@ services:
   sensor:
     build:
       context: ./IoT_devices
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     restart: on-failure
     ports:
       - "3001-3501:3000"
     links:
-      - mosquitto
+      - server
     depends_on:
       - mosquitto
+    volumes:
+      - ./IoT_devices:/home/app
 
   server:
     build:
       context: ./Cloud_service
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     restart: on-failure
     ports:
       - "3000:3000"
@@ -44,6 +44,9 @@ services:
       - mosquitto
       - mongo
       - kafka
+    volumes:
+      - ./Cloud_service:/home/app
+      
 
   mongo_express:
     image: mongo-express:0.54.0
@@ -78,8 +81,6 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
-    restart: on-failure
-
 
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -95,4 +96,3 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       TOPIC_AUTO_CREATE: true
-    restart: on-failure

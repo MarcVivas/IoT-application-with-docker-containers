@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "kafka-node": "^5.0.0",
-    "kafkajs": "^2.2.2",
-    "mongoose": "^6.7.2",
-    "mqtt": "^4.3.7",
-    "node-pickle": "^0.0.2"
-  }
-}
