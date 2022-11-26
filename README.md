@@ -1,1 +1,1 @@
-# Distributed-basic-IoT-application-with-docker
+# IoT application with docker containers
