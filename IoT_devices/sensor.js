@@ -53,7 +53,6 @@ function publishCollectedData(collectedData, topic, client){
         const message = JSON.stringify({
             "sensorId": process.env.HOSTNAME,
             "temperature": collectedData[temperatureId],
-            'temperatureId': temperatureId,
             'collectedAt': new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
         });
 

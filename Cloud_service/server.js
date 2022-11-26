@@ -130,7 +130,6 @@ function processMQTTMessage(kafkaProducer){
                 v: data.temperature,
                 ts: data.collectedAt,
                 sensor: data.sensorId,
-                id: data.temperatureId
             })
         }], sendCallback(data.sensorId));
 

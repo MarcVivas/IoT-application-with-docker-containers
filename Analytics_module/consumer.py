@@ -47,8 +47,7 @@ for message in my_consumer:
     df_pred['ds'] = pd.to_datetime(df_pred['ds'])
     forecast = m.predict(df_pred)
     forecast['sensor'] = message['sensor']
-    forecast['id'] = message['id']
     my_producer.send('analytics_results',
-                     value= forecast[['id', 'ds', 'yhat', 'yhat_lower', 'yhat_upper', 'sensor']].to_json(orient="index", date_format='iso'))
+                     value= forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper', 'sensor']].to_json(orient="index", date_format='iso'))
     print("------------- Analytics results -------------")
-    print(forecast[['id', 'ds', 'yhat', 'yhat_lower', 'yhat_upper', 'sensor']].to_json(orient="index", date_format='iso'))
+    print(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper', 'sensor']].to_json(orient="index", date_format='iso'))
