@@ -1,15 +1,17 @@
 # IoT application with docker containers
 
-## Authors
+## 1. Authors
 1. Marc Vivas Baiges
 
 ## Table of Contents
-1. [Authors](#authors)
-2. [Introduction](#introduction)
-3. [How to run the application](#how-to-run-the-application)
-4. [Description of each component](#description-of-each-component)
+1. [Authors](#1-authors)
+2. [Introduction](#2-introduction)
+3. [How to run the application](#3-how-to-run-the-application)
+4. [Description of each component](#4-description-of-each-component)
+5. [Design decisions](#5-design-decisions) 
+6. [References](#6-references)
 
-## Introduction
+## 2. Introduction
 This project consists of the creation of an IoT application.  
 
 ![alt text](IoT_application.jpg "IoT_application")  
@@ -18,7 +20,7 @@ This project consists of the creation of an IoT application.
 > Note 2: More information about the project in `./statement.pdf`.
 <br>  
 
-## How to run the application
+## 3. How to run the application
 
 First, you have to go to the folder where the `docker-compose.yml` file is located.  
 
@@ -44,9 +46,82 @@ project-sensor-2            | Sensor a7c0968ea3f7 has now sent a message to the 
 If everything works well, you can open a browser and go to http://localhost:8081/db/server/ (mongo-express) to view the data that is being processed.         
 <br>
 
-## Description of each component 
+## 4. Description of each component
+### Sensors
+The sensors send the data they collect from `data2.csv` to the server by using an MQTT broker.
+The sensors publish the gathered data to the `temperature` topic every 10 seconds. The server will subscribe to this topic in order to receive the sensor's information.    
 
-## References
+The messages are in JSON format and have this structure:
+```json
+{
+  "sensorId": String, // Identifier of the sensor. It's the container HOSTNAME.
+  "temperature": Number, // Temperature captured by the sensor, extracted from the csv file.
+  'collectedAt': DateTime // When the temperature was captured
+}
+```
+
+### Server
+When the server receives data from the sensors, it is stored in the database. Immediately after, the server will send the sensor data to the Analytics module using the `analytics` kafka topic.
+
+The sent message has the following structure:  
+```json
+{
+  "v": Number,    // Captured temperature
+  "ts": Date,   // When the data was captured
+  "sensor": String,   // Sensor id
+}
+```
+
+The server consumes data that is sent to the `analytics_results` Kafka topic. When it receives a new message, the server stores it in the database.
+### Analytics module
+The analytics module communicates with the server using Kafka. The analytics module will be waiting patiently listening to the `analytics` topic. 
+Once the server sends a message
+
+### Database
+The responsibility of the database is to store the analytics results and the sensor's information. This data is stored in two timeseries collections. The collections are titled:
+1. model_predictions
+2. sensors
+
+#### Sensor collection
+The sensor collection stores documents with the following structure:
+```json
+{
+  "temperature": Number,      // Captured temperature
+  "collected_at": Date,       // Collection date
+  "metadata": {
+    "sensor_id": String       // Id of the sensor
+  }
+}
+```
+
+#### Model prediction collection
+The model prediction collection stores documents with the following structure:
+```json
+{
+  "date": Date,       // Collection date
+  "y_hat": Number,   // Temperature prediction
+  "y_hat_lower": Number,  // Prediction
+  "y_hat_upper": Number,  // Prediction
+  "metadata": {
+    "sensor_id": String,  // Id of the sensor
+  }
+}
+```
+### Mongo express
+This service lets us visualize the data that is being stored in the database. You can access this service if you visit this page http://localhost:8081/db/server/ .
+
+## 5. Design decisions
+
+### Programming languages
+The sensors and the server are written in JavaScript.\
+The project could have been written in any popular language, I've chosen JS because I wanted to gain more experience with it.  
+  
+The analytics module, which has been given, is written in Python.
+
+### Analytics module modification
+`consumer.py` has been slightly modified in order to receive and send JSON messages instead of Python dictionaries.
+
+## 6. References
 1. Environment variables: https://stackoverflow.com/questions/52650775/how-to-pass-environment-variables-from-docker-compose-into-the-nodejs-project
 2. MQTT.js: https://www.npmjs.com/package/mqtt#end
 3. MQTT.js tutorial: https://www.emqx.com/en/blog/mqtt-js-tutorial
