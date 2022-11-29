@@ -161,6 +161,18 @@ The Analytics_module now also creates the `analytics_results` Kafka topic if it 
 
 Some prints have also been added to keep better track of what the service is doing.
 
+
+### MQTT
+The server and the sensors will be using a npm package called 
+[mqtt.js](https://www.npmjs.com/package/mqtt) in order to communicate with the chosen 
+MQTT broker, which is called [mosquitto](https://mosquitto.org/).
+
+### Kafka
+The server and the sensors will be using npm package called [kafka-node](https://www.npmjs.com/package/kafka-node)
+to communicate with the chosen Kafka broker which is called [cp-kafka](https://hub.docker.com/r/confluentinc/cp-kafka/).
+
+Kafka needs Zookeeper to work properly.
+
 ### Dockerize
 [Dockerize]( https://github.com/jwilder/dockerize) is a tool that allows services to wait for other services to be ready. The next services 
 are using dockerize:  
