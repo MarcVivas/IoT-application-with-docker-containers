@@ -48,34 +48,59 @@ If everything works well, you can open a browser and go to http://localhost:8081
 
 ## 4. Description of each component
 ### Sensors
-The sensors send the data they collect from `data2.csv` to the server by using an MQTT broker.
-The sensors publish the gathered data to the `temperature` topic every 10 seconds. The server will subscribe to this topic in order to receive the sensor's information.    
+Sensors send the data they collect from `data2.csv` to the server by using an MQTT broker.
+Sensors publish the gathered data to the `temperature` topic every 10 seconds. The server will subscribe to this topic in order to receive the sensor's information.    
 
-The messages are in JSON format and have this structure:
-```json
-{
+The messages the server will receive are in JSON format and have this structure:
+```node
+let message = {
   "sensorId": String, // Identifier of the sensor. It's the container HOSTNAME.
   "temperature": Number, // Temperature captured by the sensor, extracted from the csv file.
-  'collectedAt': DateTime // When the temperature was captured
+  'collectedAt': Date // When the temperature was captured
+}
+```
+
+### Analytics module
+The Analytic_module receives sensor data from the server and uses an AI model to make predictions.
+The predictions are sent back to the server, which will store them.  
+
+The Analytics_module will be consuming sensor data that is being published to the 
+`analytics` Kafka topic. Once a new message arrives, the analytics module will make a prediction.
+The result will be sent back to the server using the `analytics_results` Kafka topic. 
+
+The messages the server will receive are in JSON format and have this structure:
+```node
+let message = {
+    "ds": Date,         // Collection date
+    "yhat": Number,     // Temperature prediction
+    "yhat_lower": Number,   // Temperature prediction
+    "yhat_upper": Number,   // Temperature prediction
+    "sensor": String    // Sensor identifier
 }
 ```
 
 ### Server
-When the server receives data from the sensors, it is stored in the database. Immediately after, the server will send the sensor data to the Analytics module using the `analytics` kafka topic.
 
-The sent message has the following structure:  
-```json
-{
+The server's responsibility is to receive data from the sensors and the analytics module. Immediately 
+after it receives a message, the server will store the data in the database.
+
+#### Sensors ==> Server ===> Analytics_module communication
+The server will subscribe to the `temperature` MQTT topic and will wait for new messages.
+After receiving a message, the server will store the content of it in the database. As soon as it finishes,
+the server will send the sensor data to the Analytics_module using the `analytics` Kafka topic.
+
+The message the Analytics_module will get has the following structure:  
+```node
+let message = {
   "v": Number,    // Captured temperature
   "ts": Date,   // When the data was captured
-  "sensor": String,   // Sensor id
+  "sensor": String  // Sensor id
 }
 ```
 
-The server consumes data that is sent to the `analytics_results` Kafka topic. When it receives a new message, the server stores it in the database.
-### Analytics module
-The analytics module communicates with the server using Kafka. The analytics module will be waiting patiently listening to the `analytics` topic. 
-Once the server sends a message
+#### Analytics_module ===> Server communication
+The server consumes data that is sent to the `analytics_results` Kafka topic. 
+When it receives a new message, the server stores it in the database.
 
 ### Database
 The responsibility of the database is to store the analytics results and the sensor's information. This data is stored in two timeseries collections. The collections are titled:
@@ -84,8 +109,8 @@ The responsibility of the database is to store the analytics results and the sen
 
 #### Sensor collection
 The sensor collection stores documents with the following structure:
-```json
-{
+```node
+let sensorDoc = {
   "temperature": Number,      // Captured temperature
   "collected_at": Date,       // Collection date
   "metadata": {
@@ -96,8 +121,8 @@ The sensor collection stores documents with the following structure:
 
 #### Model prediction collection
 The model prediction collection stores documents with the following structure:
-```json
-{
+```node
+let modelPredictionDoc = {
   "date": Date,       // Collection date
   "y_hat": Number,   // Temperature prediction
   "y_hat_lower": Number,  // Prediction
@@ -108,18 +133,40 @@ The model prediction collection stores documents with the following structure:
 }
 ```
 ### Mongo express
-This service lets us visualize the data that is being stored in the database. You can access this service if you visit this page http://localhost:8081/db/server/ .
+This service lets us visualize the data that is being stored in the database. 
+You can access this service if you visit the following page http://localhost:8081/db/server/ .
 
 ## 5. Design decisions
 
 ### Programming languages
-The sensors and the server are written in JavaScript.\
-The project could have been written in any popular language, I've chosen JS because I wanted to gain more experience with it.  
+The sensors and the server are written in JavaScript. The project could have been written in
+any popular language, I've chosen JS because I wanted to gain more experience with it.  
   
 The analytics module, which has been given, is written in Python.
 
+### Database
+The database that is used is **MongoDB**. The type of data it is wanted to be stored are time 
+series, which are basically measurements ordered in time. MongoDB offers an optimized way to store
+this type of data, 
+they are called [time series collections](https://www.mongodb.com/docs/manual/core/timeseries-collections/#time-series-collections).
+
+In order to interact with the database, the server uses a npm package called [mongoose](https://mongoosejs.com/).
+
+
 ### Analytics module modification
-`consumer.py` has been slightly modified in order to receive and send JSON messages instead of Python dictionaries.
+`consumer.py` has been slightly modified in order to receive and send JSON messages 
+instead of Python dictionaries.
+
+The Analytics_module now also creates the `analytics_results` Kafka topic if it does not exist. 
+
+Some prints have also been added to keep better track of what the service is doing.
+
+### Dockerize
+[Dockerize]( https://github.com/jwilder/dockerize) is a tool that allows services to wait for other services to be ready. The next services 
+are using dockerize:  
+1. Server: Waits for Kafka, Zookeeper, Mosquitto and Mongo to be ready.
+2. Sensors: Wait for Mosquitto to be ready.
+3. Analytic_module: Waits for Kafka and Zookeeper to be prepared.
 
 ## 6. References
 1. Environment variables: https://stackoverflow.com/questions/52650775/how-to-pass-environment-variables-from-docker-compose-into-the-nodejs-project
