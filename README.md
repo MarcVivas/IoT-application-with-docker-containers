@@ -150,7 +150,7 @@ series, which are basically measurements ordered in time. MongoDB offers an opti
 this type of data, 
 they are called [time series collections](https://www.mongodb.com/docs/manual/core/timeseries-collections/#time-series-collections).
 
-In order to interact with the database, the server uses a npm package called [mongoose](https://mongoosejs.com/).
+In order to interact with the database, the server uses an npm package called [mongoose](https://mongoosejs.com/).
 
 
 ### Analytics module modification
@@ -163,15 +163,21 @@ Some prints have also been added to keep better track of what the service is doi
 
 
 ### MQTT
-The server and the sensors will be using a npm package called 
+The server and the sensors will be using an npm package called 
 [mqtt.js](https://www.npmjs.com/package/mqtt) in order to communicate with the chosen 
 MQTT broker, which is called [mosquitto](https://mosquitto.org/).
 
+The reason to use mosquitto is because it was taught during class.
+
 ### Kafka
 The server and the sensors will be using npm package called [kafka-node](https://www.npmjs.com/package/kafka-node)
-to communicate with the chosen Kafka broker which is called [cp-kafka](https://hub.docker.com/r/confluentinc/cp-kafka/).
+to communicate with the chosen Kafka broker, which is called [cp-kafka](https://hub.docker.com/r/confluentinc/cp-kafka/).
 
-Kafka needs Zookeeper to work properly.
+I first tried Bitnami Kafka but it didn't work, so I decided to use the alternative I just mentioned.
+
+Kafka needs [Zookeeper](https://zookeeper.apache.org/) to work properly, so this is also installed in
+its own container.
+
 
 ### Dockerize
 [Dockerize]( https://github.com/jwilder/dockerize) is a tool that allows services to wait for other services to be ready. The next services 
