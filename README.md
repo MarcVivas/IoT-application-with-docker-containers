@@ -9,7 +9,8 @@
 3. [How to run the application](#3-how-to-run-the-application)
 4. [Description of each component](#4-description-of-each-component)
 5. [Design decisions](#5-design-decisions) 
-6. [References](#6-references)
+6. [Conclusions and time spent](#6-conclusions)
+7. [References](#7-references)
 
 ## 2. Introduction
 This project consists of the creation of an IoT application.  
@@ -194,9 +195,12 @@ are using dockerize:
 
 ## 6. Conclusions
 The requirements of the statement have been fulfilled. The next goal is to implement a RESTful API 
-to access the data stored, but this is something it will be done in the next part of the project.  
-  
-Personally, I enjoyed this project, as I learned how to work with Docker, which I find very interesting and useful.
+to access the data stored, but this is something it will be done in the next part of the project.
+ 
+Personally, I enjoyed this project, as I learned how to work with Docker, which I find very interesting and useful.  
+
+Approximate time spent: **51 hours**. 
+
 ## 7. References
 1. Environment variables: https://stackoverflow.com/questions/52650775/how-to-pass-environment-variables-from-docker-compose-into-the-nodejs-project
 2. MQTT.js: https://www.npmjs.com/package/mqtt#end
