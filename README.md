@@ -132,6 +132,7 @@ let modelPredictionDoc = {
   }
 }
 ```
+> Note: The data is stored using time series collections, an optimized way of storing time series in MongoDB. 
 ### Mongo express
 This service lets us visualize the data that is being stored in the database. 
 You can access this service if you visit the following page http://localhost:8081/db/server/ .
