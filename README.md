@@ -33,7 +33,10 @@ docker compose up --scale sensor=1
 
 > Note: The number of sensors can be changed by increasing the number of the command. (sensor=2, sensor=3 ...)  
 
-You will have to wait for all the containers to be up and running, this takes a bit of time.  
+You will have to wait for all the containers to be up and running, this takes a bit of time. Sometimes
+while the application is starting you could see something to crash, not always but, don't worry, the service
+will restart and stabilize, don't touch anything!. 
+
 To know if the application is running, you should see messages like this in the terminal:
 ```
 project-sensor-4            | Sensor 44b4f68f5c2e has now sent a message to the server!
