@@ -60,6 +60,8 @@ let message = {
 }
 ```
 
+The sensor code is available in the `./IoT_devices` folder, to be more specific the name of the file is `sensor.js`.
+
 ### Analytics module
 The Analytic_module receives sensor data from the server and uses an AI model to make predictions.
 The predictions are sent back to the server, which will store them.  
@@ -78,6 +80,7 @@ let message = {
     "sensor": String    // Sensor identifier
 }
 ```
+The analytics module code is available in the `./Analytics_module` folder, to be more specific the name of the file is `consumer.py`.
 
 ### Server
 
@@ -101,6 +104,8 @@ let message = {
 #### Analytics_module ===> Server communication
 The server consumes data that is sent to the `analytics_results` Kafka topic. 
 When it receives a new message, the server stores it in the database.
+
+The server code is available in the `./Cloud_service` folder, to be more specific the name of the file is `server.js`.
 
 ### Database
 The responsibility of the database is to store the analytics results and the sensor's information. This data is stored in two timeseries collections. The collections are titled:
