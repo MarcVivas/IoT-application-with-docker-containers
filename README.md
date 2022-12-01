@@ -186,7 +186,12 @@ are using dockerize:
 2. Sensors: Wait for Mosquitto to be ready.
 3. Analytic_module: Waits for Kafka and Zookeeper to be prepared.
 
-## 6. References
+## 6. Conclusions
+The requirements of the statement have been fulfilled. The next goal is to implement a RESTful API 
+to access the data stored, but this is something it will be done in the next part of the project.  
+  
+Personally, I enjoyed this project, as I learned how to work with Docker, which I find very interesting and useful.
+## 7. References
 1. Environment variables: https://stackoverflow.com/questions/52650775/how-to-pass-environment-variables-from-docker-compose-into-the-nodejs-project
 2. MQTT.js: https://www.npmjs.com/package/mqtt#end
 3. MQTT.js tutorial: https://www.emqx.com/en/blog/mqtt-js-tutorial
