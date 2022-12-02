@@ -162,6 +162,9 @@ they are called [time series collections](https://www.mongodb.com/docs/manual/co
 
 In order to interact with the database, the server uses an npm package called [mongoose](https://mongoosejs.com/).
 
+The content of the database is not going to be stored on the host computer, 
+since I'm not interested on the data. For this reason, only while the system is running you 
+will be able to access it. 
 
 ### Analytics module modification
 `consumer.py` has been slightly modified in order to receive and send JSON messages 
