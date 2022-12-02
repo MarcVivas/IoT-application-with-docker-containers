@@ -2,6 +2,7 @@ version: "3.9"
 services:
   mongo:
     image: mongo:4.2.23
+    container_name: mongo
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: 1234
@@ -34,6 +35,7 @@ services:
       context: ./Cloud_service
       dockerfile: Dockerfile
     restart: on-failure
+    container_name: server
     ports:
       - "3000:3000"
     links:
@@ -50,6 +52,7 @@ services:
     ports:
       - "8081:8081"
     restart: on-failure
+    container_name: mongo-express
     environment:
       ME_CONFIG_MONGODB_SERVER: mongo
       ME_CONFIG_MONGODB_ADMINUSERNAME: admin
@@ -64,6 +67,7 @@ services:
       context: ./Analytics_module
       dockerfile: Dockerfile
     restart: on-failure
+    container_name: analytics_module
     ports:
       - "8010:8010"
     depends_on:
@@ -72,7 +76,8 @@ services:
       - kafka
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:latest
+    image: confluentinc/cp-zookeeper:7.3.0
+    container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -82,7 +87,8 @@ services:
 
 
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka
     depends_on:
       - zookeeper
     ports:
