@@ -27,8 +27,8 @@ First, you have to go to the folder where the `docker-compose.yml` file is locat
 
 Once there, you can execute the next command to run the application.
 
-```
-docker compose up --scale sensor=1
+```bash
+sudo docker compose up --scale sensor=1
 ```
 
 > Note: The number of sensors can be changed by increasing the number of the command. (sensor=2, sensor=3 ...)  
